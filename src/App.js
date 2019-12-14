@@ -1,22 +1,73 @@
-import React from "react";
-import logo from "./logo.svg";
-import "./App.css";
+import React, { useState, useEffect } from "react";
+// import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { Navbar, Nav } from "react-bootstrap";
+import { Link } from "react-router-dom";
+import Routes from "./Routes";
+import { LinkContainer } from "react-router-bootstrap";
+import { Auth } from "aws-amplify";
 
 function App() {
-    return (
-        <div className="App">
-            <header className="App-header">
-                <img src={logo} className="App-logo" alt="logo" />
-                <p>
-                    Edit <code>src/App.js</code> and save to reload.
-                </p>
-                <a className="App-link" href="https://reactjs.org" target="_blank" rel="noopener noreferrer">
-                    Learn React
-                </a>
-            </header>
-        </div>
-    );
+  const [isLoggedIn, hasLoggedIn] = useState(false);
+  const [loggedEmail, setLoggedEmail] = useState("");
+  const [isAuthenticating, setIsAuthenticating] = useState(true);
+
+  useEffect(() => {
+    onLoad();
+  }, []);
+
+  async function onLoad() {
+    try {
+      await Auth.currentSession();
+      hasLoggedIn(true);
+    } catch (e) {
+      if (e !== "No current user") {
+        alert(e);
+      }
+    }
+
+    setIsAuthenticating(false);
+  }
+
+  const handleLogout = async e => {
+    e.preventDefault();
+    await Auth.signOut();
+    hasLoggedIn(false);
+  };
+
+  return (
+    !isAuthenticating && (
+      <div className="App container">
+        <Navbar bg="light" expand="lg">
+          <Navbar.Brand>
+            <Link to="/">SKratch</Link>
+          </Navbar.Brand>
+          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Collapse id="basic-navbar-nav">
+            <Nav className="ml-auto">
+              {isLoggedIn ? (
+                <LinkContainer to="/logout">
+                  <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
+                </LinkContainer>
+              ) : (
+                <>
+                  <LinkContainer to="/signup">
+                    <Nav.Link>Signup</Nav.Link>
+                  </LinkContainer>
+                  <LinkContainer to="/login">
+                    <Nav.Link>Login</Nav.Link>
+                  </LinkContainer>
+                </>
+              )}
+            </Nav>
+          </Navbar.Collapse>
+        </Navbar>
+        <Routes
+          appProps={{ isLoggedIn, hasLoggedIn, loggedEmail, setLoggedEmail }}
+        />
+      </div>
+    )
+  );
 }
 
 export default App;
