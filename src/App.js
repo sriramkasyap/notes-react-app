@@ -2,14 +2,13 @@ import React, { useState, useEffect } from "react";
 // import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Navbar, Nav } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, withRouter } from "react-router-dom";
 import Routes from "./Routes";
 import { LinkContainer } from "react-router-bootstrap";
 import { Auth } from "aws-amplify";
 
-function App() {
+function App(props) {
   const [isLoggedIn, hasLoggedIn] = useState(false);
-  const [loggedEmail, setLoggedEmail] = useState("");
   const [isAuthenticating, setIsAuthenticating] = useState(true);
 
   useEffect(() => {
@@ -33,6 +32,7 @@ function App() {
     e.preventDefault();
     await Auth.signOut();
     hasLoggedIn(false);
+    props.history.push("/login");
   };
 
   return (
@@ -62,12 +62,10 @@ function App() {
             </Nav>
           </Navbar.Collapse>
         </Navbar>
-        <Routes
-          appProps={{ isLoggedIn, hasLoggedIn, loggedEmail, setLoggedEmail }}
-        />
+        <Routes appProps={{ isLoggedIn, hasLoggedIn }} />
       </div>
     )
   );
 }
 
-export default App;
+export default withRouter(App);

@@ -1,21 +1,24 @@
 import React, { useState } from "react";
-import { Form, Button } from "react-bootstrap";
+import { Form } from "react-bootstrap";
 import "./Login.css";
 import { Auth } from "aws-amplify";
+import LoaderButton from "../components/Loader";
 
 const Login = props => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
+    setIsLoading(true);
     try {
       await Auth.signIn(email, password);
       props.hasLoggedIn(true);
-      props.setLoggedEmail(email);
       props.history.push("/");
     } catch (error) {
       alert(error);
+      setIsLoading(false);
     }
   }
 
@@ -46,14 +49,15 @@ const Login = props => {
             placeholder="Password"
           />
         </Form.Group>
-        <Button
+        <LoaderButton
+          isLoading={isLoading}
           onClick={handleSubmit}
           disabled={!verifyFields()}
           variant="primary"
           type="submit"
         >
           Login
-        </Button>
+        </LoaderButton>
       </Form>
     </div>
   );
